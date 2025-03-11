@@ -33,7 +33,7 @@ SFT 和 DPO
 
 条件计算（conditional computation）通过在每个样本基础上激活网络的一部分，从而在不显著增加计算量的情况下大幅提升模型容量。作者实现条件计算的方法是引入一种新型的通用神经网络组件：**稀疏门控专家混合层**（Sparsely-Gated Mixture-of-Experts Layer, MoE）。MoE 由若干专家组成，每个专家是一个简单的前馈神经网络，同时包含一个可训练的门控网络，用于为每个输入选择专家的稀疏组合（见下图）。
 
-![moe17-1](/Users/guchenyang/Documents/images/moe17-1.png)
+![moe17-1](moe17-1.png)
 
 MoE 层由一组 $n$ 个专家网络 $E_1,...E_n$ 和一个输出 $n$ 维稀疏向量的门控网络 $G$ 组成，专家网络本身是神经网络，虽然原则上只要求专家网络接受相同大小的输入并产生相同大小的输出，但是在该研究中作者将其设置为架构相同参数不同的前馈网络。
 
@@ -113,7 +113,7 @@ $$
 
 这篇工作将 MoE 用在了 Transformer 架构中，具体方式是在编码器和解码器中，将每隔一个前馈层替换为带有 Top-2 门控变体的逐位置（position-wise）MoE 层。
 
-![TransformerMoE](/Users/guchenyang/Documents/images/TransformerMoE.png)
+![TransformerMoE](TransformerMoE.png)
 
 #### Position-wise MoE
 
@@ -144,7 +144,7 @@ $\text{GATE}(\cdot)$ 将训练批次中的所有 token 分配到 $G$ 个组中�
 
 3. **Auxiliary Loss and Random Routing**
 
-![algo-transmoe](/Users/guchenyang/Documents/images/algo-transmoe.png)
+![algo-transmoe](algo-transmoe.png)
 
 根据图中算法，我们先看输入：
 
@@ -264,7 +264,7 @@ $$
 
 #### DeepSeekMoE 的架构
 
-![dsmoe](/Users/guchenyang/Documents/images/dsmoe.png)
+![dsmoe](dsmoe.png)
 
 从左到右分别描述了：普通的 Top-2 MoE → **细粒度** MoE → 添加**共享专家**的细粒度 MoE（DeepSeekMoE），但是注意，在上述三个情景中并没有增加参数和计算成本。
 
@@ -373,13 +373,13 @@ Q_t = x_tW_Q
 $$
 即只需要考虑当前 token 生成的 $Q_t$ 向量并进行后续注意力计算，并不需要缓存前面的 $Q_{1...t-1}$，因为使用这些 $Q$ 向量与 $K^T$ 相乘得到的结果跟之前计算得到的结果是一样的，不需要这些重复的结果，所以每次对新的 token 产生的 $Q$ 向量都是不同的，因此不需要缓存，贴一张很清晰的图（图源：[https://zhuanlan.zhihu.com/p/662498827](https://zhuanlan.zhihu.com/p/662498827)）：
 
-![kvc](/Users/guchenyang/Documents/images/kvc.png)
+![kvc](kvc.png)
 
 因为在自注意力中，最初输入的序列对于 $W_q,W_k,W_v$ 来说都是一样的，所以不设置缓存时，每次计算的输入就是在重复上一次的输入之后加了一个新的 token 而已，由此就导致了大量的计算冗余；而设置缓存后，每次的输入只取最后一个 token（就是前面最新生成的），因此对于 Q 来说就是只需要考虑当前 token 生成的 $Q_t$ 向量，对于 KV 来说也是只考虑当前 token 生成的 KV 向量（之前的直接拼接缓存就好了）
 
 #### 模型架构
 
-![dsv2](/Users/guchenyang/Documents/images/dsv2.png)
+![dsv2](dsv2.png)
 
 DeepSeek V2 的整体架构如上图，接下来我们主要看 MLA 的部分，首先简单回顾标准的多头注意力：
 
@@ -492,7 +492,7 @@ $\mathbf{c}_t^{KV} \in \mathbb{R}^{d_c}$ 是 Keys 和 Values 的压缩潜在向�
 >
 
 
-![mla](/Users/guchenyang/Documents/images/mla.png)
+![mla](mla.png)
 
 此外，为了减少训练过程中的激活内存，这里还进行了对 Queries 的低秩压缩（无法减少 KV Cache）：
 $$
@@ -547,7 +547,7 @@ $$
 
 PPO 中使用的价值函数通常是另一个与策略模型相当规模的模型，这带来了大量的内存和计算负担。此外，在 RL 训练过程中，**价值函数被用作计算优势函数时的基线**，用于减少方差。而在 LLM 环境中，通常只有最后一个 token 会被奖励模型赋予奖励分数，这可能会使得训练一个在每个 token 位置都准确的价值函数变得复杂。
 
-![grpo](/Users/guchenyang/Documents/images/grpo.png)
+![grpo](grpo.png)
 
 为了解决这个问题，如图所示，作者提出了群组相对策略优化（Group Relative Policy Optimization, GRPO），它**避免了像 PPO 那样需要额外的价值函数近似**，而是使用对**同一问题的多个采样输出的平均奖励作为基线**。具体来说，对于每个问题 $q$，GRPO 从旧策略 $\pi_{\theta_{old}}$ 中采样一组输出 $\{o_1, o_2, \cdots, o_G\}$，然后通过最大化以下目标函数来优化策略模型：
 
@@ -697,7 +697,7 @@ $$
 
 具体来说，主模型做的就是传统的 `next token prediction`，即预测 $P(t_4|t_1,t_2,t_3)$，而 MTP 1 模块表面上看是 $P(t_4|t_1,t_2)$，但实际上由于拼接了 $t_3$ 的嵌入向量，所以是 $P(t_4|t_1,t_2,\text{Emb}(t_3))$，但这是一种不充分的信息混合，$t_3$ 可以视为一种较弱的训练信息，而 V3 在训练时也只使用了到 MTP 1 的模块，对模型的训练任务进行了适当的扩展从而获得了更好的性能。
 
-![mtp](/Users/guchenyang/Documents/images/mtp.png)
+![mtp](mtp.png)
 
 ---
 
@@ -744,7 +744,7 @@ $\mathbf{h}_i^k$ 是第 $i$ 个 token 在预测深度 $k$ 上的输出表示，$
 
 由样本构建中输入与预测目标的错开的位置我们也能够理解公式 (3) 的下标 $i+k+1$ 的含义了。
 
-![](/Users/guchenyang/Documents/images/mtp1.jpg)
+![](mtp1.jpg)
 图源：[https://zhuanlan.zhihu.com/p/18056041194](https://zhuanlan.zhihu.com/p/18056041194)
 
 对于每个深度 $k \geq 1$，我们计算交叉熵损失 $$\mathcal{L}_{\text{MTP}}^k$$：
