@@ -162,8 +162,14 @@ $\text{GATE}(\cdot)$ 将训练批次中的所有 token 分配到 $G$ 个组中�
 1. 初始化专家计数器并计算门控值
 
 $$
-c_E = 0\\
-g_{S,E} = \text{softmax}(W_g \cdot x_S)  \\
+c_E = 0
+$$
+
+$$
+g_{S,E} = \text{softmax}(W_g \cdot x_S)
+$$
+
+$$
 m_E= \frac{1}{S}\sum_{s=1}^{S}g_{s,E}
 $$
 
