@@ -118,6 +118,7 @@ $$
 #### Position-wise MoE
 
 该模型中的 MoE 层正是基于前一篇介绍的工作，在稀疏门控与辅助损失上做出调整。Transformer 中的一个 MoE 层由 $E$ 个前馈网络组成：$FFN_1 \cdots FFN_E$：
+
 $$
 \mathcal{G}_{s, E} = \text{GATE}(x_s)
 $$
@@ -161,10 +162,12 @@ $\text{GATE}(\cdot)$ 将训练批次中的所有 token 分配到 $G$ 个组中�
 1. 初始化专家计数器并计算门控值
 
 $$
-c_E = 0  && \text{初始化专家计数器}  \\
-g_{S,E} = \text{softmax}(W_g \cdot x_S)  && \text{计算每个 token 对每个专家的门控值}  \\
-m_E= \frac{1}{S}\sum_{s=1}^{S}g_{s,E}  && 计算每个专家的平均门控值
+c_E = 0\\
+g_{S,E} = \text{softmax}(W_g \cdot x_S)  \\
+m_E= \frac{1}{S}\sum_{s=1}^{S}g_{s,E}
 $$
+
+初始化专家计数器；计算每个 token 对每个专家的门控值；计算每个专家的平均门控值
 
 2. 处理最优专家
 
